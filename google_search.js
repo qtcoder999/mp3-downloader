@@ -1,6 +1,5 @@
 /* eslint-disable linebreak-style */
 const { Builder, By, until } = require("selenium-webdriver");
-const { Options } = require("selenium-webdriver/chrome");
 const excel = require("./excel");
 require("chromedriver");
 
@@ -12,12 +11,7 @@ const metaData = [];
 
 async function openChrome() {
   return new Promise(async resolve => {
-    driver = new Builder()
-      .forBrowser("chrome")
-      .setChromeOptions(
-        new Options().addArguments("document-user-activation-required")
-      )
-      .build();
+    driver = new Builder().forBrowser("chrome").build();
     driver.then(() => {
       resolve();
     });
@@ -38,47 +32,36 @@ const searchTheTerm = async searchTerm => {
   const iAmFeelingLuckyLocator = By.css(
     '.FPdoLc.VlcLAe input[aria-label="I\'m Feeling Lucky"]'
   );
-  // const inputScript = `document.getElementsByName('q')[0].value='${searchTerm} ${suffix}'`;
-  // console.log(inputScript);
+
   try {
-    return (
-      driver
-        .get(url)
-        // .then(async () => {
-        //   await driver.findElement(async () =>
-        //     driver
-        //       .wait(until.elementLocated(searchLocator))
-        // .then(await driver.executeScript(inputScript))
-        // .then(
-        //   await driver.executeScript(
-        //     `console.log(document.getElementsByName('q')[0].value)`
-        //   )
-        // )
-        //       .sendKeys(`${searchTerm} ${suffix}`)
-        //   );
-        // })
-        .then(
-          await driver
-            .findElement(async () =>
-              driver.wait(until.elementLocated(searchLocator))
+    return driver
+      .get(url)
+      .then(
+        await driver
+          .findElement(async () =>
+            driver.wait(until.elementLocated(searchLocator))
+          )
+          .sendKeys(`${searchTerm} ${suffix}`)
+      )
+      .then(
+        await driver
+          .findElement(async () =>
+            driver.wait(until.elementLocated(iAmFeelingLuckyLocator))
+          )
+          .then(
+            await driver.executeScript(
+              'document.querySelector("#tsf > div:nth-child(2) > div > div.FPdoLc.VlcLAe > center > input[type=submit]:nth-child(2)").click()'
             )
-            .sendKeys(`${searchTerm} ${suffix}`)
-        )
-        .then(
-          await driver
-            .findElement(async () =>
-              driver.wait(until.elementLocated(iAmFeelingLuckyLocator))
-            )
-            .then(
-              await driver.executeScript(
-                'document.querySelector("#tsf > div:nth-child(2) > div > div.FPdoLc.VlcLAe > center > input[type=submit]:nth-child(2)").click()'
-              )
-            )
-            .then(async () => {
-              if (suffix.toLowerCase().indexOf("youtube") >= -1) {
+          )
+          .then(() => {
+            if (suffix.toLowerCase().indexOf("youtube") >= -1) {
+              setTimeout(async () => {
+                await driver.executeScript("window.stop();");
                 await driver.executeScript(
-                  "window.stop(); var elem = document.querySelector('body');elem.parentNode.removeChild(elem)"
+                  'videos = document.querySelectorAll("video"); for(video of videos) {video.pause()}'
                 );
+                // eslint-disable-next-line no-console
+                console.log("SetTimeout executed");
                 const pageURL = await driver.getCurrentUrl();
                 let pageTitle = await driver.getTitle();
                 pageTitle = pageTitle.substring(
@@ -86,16 +69,16 @@ const searchTheTerm = async searchTerm => {
                   pageTitle.indexOf(" - YouTube")
                 );
                 metaData.push({ pageURL, pageTitle });
-              }
-              return true;
-            })
+                return true;
+              }, 6000);
+            }
+          })
+      )
+      .then(
+        await driver.executeScript(
+          'videos = document.querySelectorAll("video"); for(video of videos) {video.pause()}'
         )
-        .then(
-          await driver.executeScript(
-            'videos = document.querySelectorAll("video"); for(video of videos) {video.pause()}'
-          )
-        )
-    );
+      );
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log("@@@@Failure", searchTerm);
@@ -125,7 +108,6 @@ const getHandles = async () => {
     /*
       Selenium issue
       https://github.com/w3c/webdriver/issues/386
-
       Using a temporary workaround
     */
     arrayDuplicate.push(arrayDuplicate.shift());

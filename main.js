@@ -13,9 +13,10 @@ const audioLoop = (metaData, count) => {
 
 // eslint-disable-next-line no-unused-vars
 const downloadMP3s = metaData => {
-  audioLoop(metaData, metaData.length - 1);
+  console.log(metaData);
+  // audioLoop(metaData, metaData.length - 1);
 };
 
 automation.start().then(() => {
-  // downloadMP3s(automation.metaData);
+  downloadMP3s(automation.metaData);
 });
