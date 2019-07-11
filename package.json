@@ -48,6 +48,7 @@
     "chromedriver": "^2.46.0",
     "fluent-ffmpeg": "^2.1.2",
     "node-xlsx": "^0.12.1",
+    "sanitize-filename": "^1.6.1",
     "selenium-webdriver": "^4.0.0-alpha.4",
     "youtube-mp3-downloader": "^0.5.3"
   }

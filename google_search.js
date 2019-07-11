@@ -53,39 +53,37 @@ const searchTheTerm = async searchTerm => {
               'document.querySelector("#tsf > div:nth-child(2) > div > div.FPdoLc.VlcLAe > center > input[type=submit]:nth-child(2)").click()'
             )
           )
-          .then(() => {
+          .then(async () => {
             if (suffix.toLowerCase().indexOf("youtube") >= -1) {
-              setTimeout(async () => {
+              const pageURL = await driver.getCurrentUrl();
+              if (pageURL.indexOf("youtube") > -1) {
                 await driver.executeScript("window.stop();");
                 await driver.executeScript(
-                  'videos = document.querySelectorAll("video"); for(video of videos) {video.pause()}'
+                  "var elem = document.querySelector('body'); elem.parentNode.removeChild(elem);"
                 );
-                // eslint-disable-next-line no-console
-                console.log("SetTimeout executed");
-                const pageURL = await driver.getCurrentUrl();
                 let pageTitle = await driver.getTitle();
                 pageTitle = pageTitle.substring(
                   0,
                   pageTitle.indexOf(" - YouTube")
                 );
                 metaData.push({ pageURL, pageTitle });
-                return true;
-              }, 6000);
+              }
             }
           })
-      )
-      .then(
-        await driver.executeScript(
-          'videos = document.querySelectorAll("video"); for(video of videos) {video.pause()}'
-        )
       );
+    // .then(async () => {
+    //   await driver.executeScript(
+    //     "var elem = document.querySelector('body'); elem.parentNode.removeChild(elem);"
+    //   );
+    //   return true;
+    // });
   } catch (err) {
     // eslint-disable-next-line no-console
     console.log("@@@@Failure", searchTerm);
     // eslint-disable-next-line no-console
     console.log("@@@@Reason", err);
-    return 1;
   }
+  return true;
 };
 
 async function windowSwitcher(searchTerm) {
@@ -98,7 +96,7 @@ const mainLoop = async (arr, count) => {
     const searchTerm = arr[count].toString();
     await windowSwitcher(searchTerm, count);
     const newCount = count + 1;
-    mainLoop(arr, newCount);
+    await mainLoop(arr, newCount);
   }
 };
 
