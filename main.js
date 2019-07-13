@@ -49,8 +49,7 @@ const excel = require("./excel");
 */
 const r = async () => {
   await automation.start();
-  await excel.writeToCsv(automation.metaData);
-  // excel.writeToCsv(metaData);
+  await excel.writeToXLS(automation.metaData);
 };
 
 r();
