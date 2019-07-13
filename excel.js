@@ -6,7 +6,7 @@ const fs = require("fs");
 const xlsx = require("node-xlsx");
 const json2xls = require("json2xls");
 
-const writeToCsv = data => {
+const writeToXLS = data => {
   try {
     const xls = json2xls(data);
 
@@ -26,4 +26,4 @@ const getDataFromExcel = async () => {
 };
 
 exports.getDataFromExcel = getDataFromExcel;
-exports.writeToCsv = writeToCsv;
+exports.writeToXLS = writeToXLS;
