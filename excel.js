@@ -1,22 +1,29 @@
 /* eslint-disable linebreak-style */
+// eslint-disable-next-line linebreak-style
+/* eslint-disable linebreak-style */
+/* eslint-disable no-console */
 const fs = require("fs");
 const xlsx = require("node-xlsx");
+const json2xls = require("json2xls");
 
-// function walk(obj) {
-//   for (let i in obj) {
-//     if (typeof obj[i] === "object" && !(obj[i] instanceof Array)) {
-//       walk(obj[i]);
-//       console.log(obj[i]);
-//     }
-//   }
-// }
+const writeToCsv = data => {
+  try {
+    const xls = json2xls(data);
+
+    fs.writeFileSync("output.xlsx", xls, "binary");
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 const getDataFromExcel = async () => {
-  let obj = xlsx.parse(`${__dirname}/myFile.xlsx`); // parses a file
+  let obj = xlsx.parse(`${__dirname}/input.xlsx`); // parses a file
 
-  obj = xlsx.parse(fs.readFileSync(`${__dirname}/myFile.xlsx`)); // parses a buffer
+  obj = xlsx.parse(fs.readFileSync(`${__dirname}/input.xlsx`)); // parses a buffer
 
   return obj;
   // walk(obj);
 };
 
 exports.getDataFromExcel = getDataFromExcel;
+exports.writeToCsv = writeToCsv;
