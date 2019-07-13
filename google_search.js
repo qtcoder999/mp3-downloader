@@ -45,24 +45,22 @@ const waitTillYouTubeOpens = () =>
     }
   });
 
-const metaPush = async () =>
+const metaPush = async (pageTitle, pageURL) =>
   new Promise(async resolve => {
-    const pageURL = await driver.getCurrentUrl();
-    if (pageURL.indexOf("youtube") > -1) {
-      let pageTitle = await driver.getTitle();
-      pageTitle = pageTitle.substring(0, pageTitle.indexOf(" - YouTube"));
-      metaData.push({ pageURL, pageTitle });
-      resolve();
-    }
+    metaData.push({ pageTitle, pageURL });
+    resolve();
   });
 
-const getTitlesAndURLs = async resolveIt =>
+const getTitlesAndURLs = async () =>
   new Promise(async resolve => {
     if (suffix.toLowerCase().indexOf("youtube") > -1) {
       await waitTillYouTubeOpens();
-      metaPush();
+      let pageTitle = await driver.getTitle();
+      pageTitle = pageTitle.substring(0, pageTitle.indexOf(" - YouTube"));
+      const pageURL = await driver.getCurrentUrl();
+
+      metaPush(pageTitle, pageURL);
       resolve();
-      resolveIt();
     }
   });
 
@@ -136,18 +134,27 @@ const getHandles = async () => {
   });
 };
 
-const passToDev = async arr => {
-  await openChrome();
-  await openTabs(arr.length - 1);
-  await getHandles();
-  // eslint-disable-next-line no-console
-  console.log("Search terms history:");
-  await mainLoop(arr, 0);
-};
+const passToDev = async arr =>
+  new Promise(async resolve => {
+    await openChrome();
+    await openTabs(arr.length - 1);
+    await getHandles();
+    // eslint-disable-next-line no-console
+    console.log("Search terms history:");
+    await mainLoop(arr, 0);
+
+    resolve();
+  });
 
 const getData = () => excel.getDataFromExcel();
 
-const start = async () => getData().then(result => passToDev(result[0].data));
+const start = async () =>
+  new Promise(async resolve => {
+    getData().then(async result => {
+      await passToDev(result[0].data);
+      resolve();
+    });
+  });
 
 exports.start = start;
 exports.metaData = metaData;
