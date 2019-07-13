@@ -50,7 +50,7 @@ const downloadMP3s = async metaData => {
 
 const r = async () => {
   const c = await automation.start();
-  await downloadMP3s(automation.metaData);
+  // await downloadMP3s(automation.metaData);
 };
 
 r();

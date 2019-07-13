@@ -25,66 +25,90 @@ const openTabs = async count => {
   return null;
 };
 
-const searchTheTerm = async searchTerm => {
-  // eslint-disable-next-line no-console
-  console.log(searchTerm);
-  const searchLocator = By.name("q");
-  const iAmFeelingLuckyLocator = By.css(
-    '.FPdoLc.VlcLAe input[aria-label="I\'m Feeling Lucky"]'
-  );
+const stopLoadingPage = async () =>
+  new Promise(async resolve => {
+    await driver.executeScript("window.stop();");
+    await driver.executeScript(
+      "var elem = document.querySelector('body'); elem.parentNode.removeChild(elem);"
+    );
+    resolve();
+  });
 
-  try {
-    return driver
-      .get(url)
-      .then(
-        await driver
-          .findElement(async () =>
-            driver.wait(until.elementLocated(searchLocator))
-          )
-          .sendKeys(`${searchTerm} ${suffix}`)
-      )
-      .then(
-        await driver
-          .findElement(async () =>
-            driver.wait(until.elementLocated(iAmFeelingLuckyLocator))
-          )
-          .then(
-            await driver.executeScript(
-              'document.querySelector("#tsf > div:nth-child(2) > div > div.FPdoLc.VlcLAe > center > input[type=submit]:nth-child(2)").click()'
-            )
-          )
-          .then(async () => {
-            if (suffix.toLowerCase().indexOf("youtube") >= -1) {
-              const pageURL = await driver.getCurrentUrl();
-              if (pageURL.indexOf("youtube") > -1) {
-                await driver.executeScript("window.stop();");
-                await driver.executeScript(
-                  "var elem = document.querySelector('body'); elem.parentNode.removeChild(elem);"
-                );
-                let pageTitle = await driver.getTitle();
-                pageTitle = pageTitle.substring(
-                  0,
-                  pageTitle.indexOf(" - YouTube")
-                );
-                metaData.push({ pageURL, pageTitle });
-              }
-            }
-          })
-      );
-    // .then(async () => {
-    //   await driver.executeScript(
-    //     "var elem = document.querySelector('body'); elem.parentNode.removeChild(elem);"
-    //   );
-    //   return true;
-    // });
-  } catch (err) {
-    // eslint-disable-next-line no-console
-    console.log("@@@@Failure", searchTerm);
-    // eslint-disable-next-line no-console
-    console.log("@@@@Reason", err);
-  }
-  return true;
+const waitTillYouTubeOpens = () =>
+  new Promise(async resolve => {
+    const pageURL = await driver.getCurrentUrl();
+    if (pageURL.toLowerCase().indexOf("youtube") > -1) {
+      await stopLoadingPage();
+      resolve(true);
+    } else {
+      waitTillYouTubeOpens();
+    }
+  });
+
+const metaPush = async () =>
+  new Promise(async resolve => {
+    const pageURL = await driver.getCurrentUrl();
+    if (pageURL.indexOf("youtube") > -1) {
+      let pageTitle = await driver.getTitle();
+      pageTitle = pageTitle.substring(0, pageTitle.indexOf(" - YouTube"));
+      metaData.push({ pageURL, pageTitle });
+      resolve();
+    }
+  });
+
+const getTitlesAndURLs = async resolveIt =>
+  new Promise(async resolve => {
+    if (suffix.toLowerCase().indexOf("youtube") > -1) {
+      await waitTillYouTubeOpens();
+      metaPush();
+      resolve();
+      resolveIt();
+    }
+  });
+
+const clickIamFeelingLuckyButton = async () => {
+  // eslint-disable-next-line no-unused-vars
+  const c = await driver.executeScript(
+    'document.querySelector("#tsf > div:nth-child(2) > div > div.FPdoLc.VlcLAe > center > input[type=submit]:nth-child(2)").click()'
+  );
 };
+
+const searchTheTerm = async searchTerm =>
+  new Promise(async resolveIt => {
+    // eslint-disable-next-line no-console
+    console.log(searchTerm);
+    const searchLocator = By.name("q");
+    const iAmFeelingLuckyLocator = By.css(
+      '.FPdoLc.VlcLAe input[aria-label="I\'m Feeling Lucky"]'
+    );
+
+    try {
+      return driver
+        .get(url)
+        .then(
+          await driver
+            .findElement(async () =>
+              driver.wait(until.elementLocated(searchLocator))
+            )
+            .sendKeys(`${searchTerm} ${suffix}`)
+        )
+        .then(
+          await driver
+            .findElement(async () =>
+              driver.wait(until.elementLocated(iAmFeelingLuckyLocator))
+            )
+            .then(await clickIamFeelingLuckyButton())
+            .then(await getTitlesAndURLs())
+            .then(resolveIt())
+        );
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log("@@@@Failure", searchTerm);
+      // eslint-disable-next-line no-console
+      console.log("@@@@Reason", err);
+    }
+    return 1;
+  });
 
 async function windowSwitcher(searchTerm) {
   await driver.switchTo().window(arrayDuplicate[arrayDuplicate.length - 1]);
