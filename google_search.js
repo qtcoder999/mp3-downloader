@@ -111,6 +111,7 @@ const searchTheTerm = async searchTerm =>
 async function windowSwitcher(searchTerm) {
   await driver.switchTo().window(arrayDuplicate[arrayDuplicate.length - 1]);
   await searchTheTerm(searchTerm).then(arrayDuplicate.pop());
+  await driver.executeScript('window.close();');
 }
 
 const mainLoop = async (arr, count) => {
