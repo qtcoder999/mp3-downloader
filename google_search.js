@@ -71,10 +71,10 @@ const clickIamFeelingLuckyButton = async () => {
   );
 };
 
-const searchTheTerm = async searchTerm =>
+const searchTheTerm = async (searchTerm, count) =>
   new Promise(async resolveIt => {
     // eslint-disable-next-line no-console
-    console.log(searchTerm);
+    console.log(`${count + 1}. ${searchTerm}`);
     const searchLocator = By.name("q");
     const iAmFeelingLuckyLocator = By.css(
       '.FPdoLc.VlcLAe input[aria-label="I\'m Feeling Lucky"]'
@@ -108,10 +108,10 @@ const searchTheTerm = async searchTerm =>
     return 1;
   });
 
-async function windowSwitcher(searchTerm) {
+async function windowSwitcher(searchTerm, count) {
   await driver.switchTo().window(arrayDuplicate[arrayDuplicate.length - 1]);
-  await searchTheTerm(searchTerm).then(arrayDuplicate.pop());
-  await driver.executeScript('window.close();');
+  await searchTheTerm(searchTerm, count).then(arrayDuplicate.pop());
+  await driver.executeScript("window.close();");
 }
 
 const mainLoop = async (arr, count) => {
