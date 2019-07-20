@@ -5,7 +5,7 @@ require("chromedriver");
 
 const url = "https://google.com";
 let driver;
-const suffix = "youtube";
+const suffix = "youtube.com";
 let arrayDuplicate = [];
 const metaData = [];
 
