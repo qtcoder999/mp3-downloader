@@ -3,7 +3,7 @@ const { Builder, By, until } = require("selenium-webdriver");
 const excel = require("./excel");
 require("chromedriver");
 
-const url = "https://google.com";
+const url = "https://duckduckgo.com/";
 let driver;
 const suffix = "youtube.com";
 let arrayDuplicate = [];
@@ -39,19 +39,22 @@ const waitTillYouTubeOpens = () =>
     const pageURL = await driver.getCurrentUrl();
     if (pageURL.toLowerCase().indexOf("youtube") > -1) {
       await stopLoadingPage();
-      resolve(true);
+      resolve();
     } else {
-      waitTillYouTubeOpens();
+      await waitTillYouTubeOpens();
     }
   });
 
 const metaPush = async (pageTitle, pageURL) =>
   new Promise(async resolve => {
-    metaData.push({ pageTitle, pageURL });
+    metaData.push({
+      pageTitle,
+      pageURL
+    });
     resolve();
   });
 
-const getTitlesAndURLs = async () =>
+const getTitlesAndURLs = async resolveIt =>
   new Promise(async resolve => {
     if (suffix.toLowerCase().indexOf("youtube") > -1) {
       await waitTillYouTubeOpens();
@@ -61,44 +64,28 @@ const getTitlesAndURLs = async () =>
 
       metaPush(pageTitle, pageURL);
       resolve();
+      resolveIt();
     }
   });
-
-const clickIamFeelingLuckyButton = async () => {
-  // eslint-disable-next-line no-unused-vars
-  const c = await driver.executeScript(
-    'document.querySelector("#tsf > div:nth-child(2) > div > div.FPdoLc.VlcLAe > center > input[type=submit]:nth-child(2)").click()'
-  );
-};
 
 const searchTheTerm = async (searchTerm, count) =>
   new Promise(async resolveIt => {
     // eslint-disable-next-line no-console
     console.log(`${count + 1}. ${searchTerm}`);
     const searchLocator = By.name("q");
-    const iAmFeelingLuckyLocator = By.css(
-      '.FPdoLc.VlcLAe input[aria-label="I\'m Feeling Lucky"]'
-    );
 
     try {
-      return driver
+      await driver
         .get(url)
         .then(
           await driver
             .findElement(async () =>
               driver.wait(until.elementLocated(searchLocator))
             )
-            .sendKeys(`${searchTerm} ${suffix}`)
-        )
-        .then(
-          await driver
-            .findElement(async () =>
-              driver.wait(until.elementLocated(iAmFeelingLuckyLocator))
-            )
-            .then(await clickIamFeelingLuckyButton())
-            .then(await getTitlesAndURLs())
-            .then(resolveIt())
+            .sendKeys(`!ducky ${searchTerm} ${suffix}\n`)
         );
+
+      await getTitlesAndURLs(resolveIt);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log("@@@@Failure", searchTerm);
@@ -108,11 +95,13 @@ const searchTheTerm = async (searchTerm, count) =>
     return 1;
   });
 
-async function windowSwitcher(searchTerm, count) {
-  await driver.switchTo().window(arrayDuplicate[arrayDuplicate.length - 1]);
-  await searchTheTerm(searchTerm, count).then(arrayDuplicate.pop());
-  await driver.executeScript("window.close();");
-}
+const windowSwitcher = async (searchTerm, count) =>
+  new Promise(async resolve => {
+    await driver.switchTo().window(arrayDuplicate[arrayDuplicate.length - 1]);
+    await searchTheTerm(searchTerm, count).then(arrayDuplicate.pop());
+    // await driver.executeScript("window.close();");
+    resolve();
+  });
 
 const mainLoop = async (arr, count) => {
   if (count <= arr.length - 1) {
