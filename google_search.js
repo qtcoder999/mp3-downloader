@@ -99,7 +99,7 @@ const windowSwitcher = async (searchTerm, count) =>
   new Promise(async resolve => {
     await driver.switchTo().window(arrayDuplicate[arrayDuplicate.length - 1]);
     await searchTheTerm(searchTerm, count).then(arrayDuplicate.pop());
-    // await driver.executeScript("window.close();");
+    await driver.executeScript("window.close();");
     resolve();
   });
 
