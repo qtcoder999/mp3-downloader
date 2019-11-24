@@ -67,7 +67,7 @@ const getTitlesAndURLs = async () =>
 const clickIamFeelingLuckyButton = async () => {
   // eslint-disable-next-line no-unused-vars
   const c = await driver.executeScript(
-    'document.querySelector("#tsf > div:nth-child(2) > div > div.FPdoLc.VlcLAe > center > input[type=submit]:nth-child(2)").click()'
+    'document.querySelector("#tsf > div:nth-child(2) > div.A8SBwf > div.FPdoLc.tfB0Bf > center > input.RNmpXc").click()'
   );
 };
 
@@ -77,7 +77,7 @@ const searchTheTerm = async (searchTerm, count) =>
     console.log(`${count + 1}. ${searchTerm}`);
     const searchLocator = By.name("q");
     const iAmFeelingLuckyLocator = By.css(
-      '.FPdoLc.VlcLAe input[aria-label="I\'m Feeling Lucky"]'
+      "#tsf > div:nth-child(2) > div.A8SBwf > div.FPdoLc.tfB0Bf > center > input.RNmpXc"
     );
 
     try {
