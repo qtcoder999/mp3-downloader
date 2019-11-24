@@ -57,7 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
-input.xlsx
+
 output.xlsx
 debug.log
 # mp3/
